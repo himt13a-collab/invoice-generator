@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice Generator — Roman Kulykov</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);font-family:'DM Sans',sans-serif;color:#e2e8f0;padding:40px 20px}
+.wrap{max-width:900px;margin:0 auto}
+.header{text-align:center;margin-bottom:48px}
+.badge{display:inline-flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border-radius:16px;padding:8px 20px;margin-bottom:16px;border:1px solid rgba(255,255,255,.08)}
+.badge span:last-child{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#94a3b8}
+h1{font-size:36px;font-weight:800;background:linear-gradient(135deg,#e2e8f0,#6366f1,#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px}
+.subtitle{color:#64748b;margin-top:8px;font-size:14px}
+.selectors{display:flex;gap:12px;justify-content:center;margin-bottom:32px;flex-wrap:wrap}
+.sel-box{background:rgba(255,255,255,.05);border-radius:12px;padding:12px 20px;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:12px}
+.sel-box label{font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px}
+.sel-box select{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#e2e8f0;padding:8px 12px;font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;cursor:pointer}
+select option{background:#1e293b}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.cards{grid-template-columns:1fr}h1{font-size:28px}}
+.card{background:rgba(255,255,255,.03);border-radius:16px;overflow:hidden}
+.card-head{padding:20px 24px 16px;display:flex;flex-direction:column;gap:4px}
+.card-head .row{display:flex;align-items:center;gap:10px}
+.dot{width:10px;height:10px;border-radius:50%}
+.card-head h2{font-size:20px;font-weight:700;color:#f1f5f9}
+.card-head .rate{font-size:12px;color:#64748b;margin-left:20px}
+.card-body{padding:20px 24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.hours-input{width:100%;background:rgba(255,255,255,.06);border-radius:10px;color:#f1f5f9;padding:12px 16px;font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;outline:none}
+.email-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#f1f5f9;padding:10px 16px;font-size:14px;font-family:'JetBrains Mono',monospace;outline:none}
+.total-row{border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.total-row span:first-child{font-size:12px;color:#94a3b8}
+.total-row span:last-child{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.btns{display:flex;gap:8px}
+.btn-dl{flex:1;border:none;border-radius:10px;color:#fff;padding:12px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-dl:disabled{background:rgba(255,255,255,.05)!important;color:#475569;cursor:not-allowed}
+.btn-mail{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#e2e8f0;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-mail:disabled{background:rgba(255,255,255,.03);color:#475569;cursor:not-allowed}
+.success{margin-top:12px;padding:10px 14px;background:rgba(34,197,94,.1);border-radius:8px;border:1px solid rgba(34,197,94,.2);font-size:12px;color:#22c55e;display:none;align-items:center;gap:6px}
+.success.show{display:flex}
+.preview-section{margin-top:32px;display:none}
+.preview-section.show{display:block}
+.preview-title{font-size:14px;color:#64748b;text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;text-align:center}
+.previews{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
+.inv-preview{background:#fff;border-radius:12px;padding:24px 28px;font-size:13px;color:#1e293b;border:1px solid #e2e8f0;max-width:520px;width:100%;display:none}
+.inv-preview.show{display:block}
+.footer{margin-top:40px;padding:16px 20px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.06);font-size:12px;color:#475569;line-height:1.6}
+.footer strong{color:#64748b}
+.footer code{color:#6366f1;font-family:'JetBrains Mono',monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="badge"><span style="font-size:24px">📄</span><span>Invoice Generator</span></div>
+    <h1>Генератор Инвойсов</h1>
+    <p class="subtitle">Выбери месяц, укажи часы — получи готовый .xlsx</p>
+  </div>
+
+  <div class="selectors">
+    <div class="sel-box">
+      <label>Год</label>
+      <select id="selYear"></select>
+    </div>
+    <div class="sel-box">
+      <label>Месяц</label>
+      <select id="selMonth"></select>
+    </div>
+  </div>
+
+  <div class="cards">
+    <!-- Grapherex -->
+    <div class="card" style="border:1px solid rgba(99,102,241,.15)">
+      <div class="card-head" style="background:linear-gradient(135deg,rgba(99,102,241,.12),transparent);border-bottom:1px solid rgba(99,102,241,.1)">
+        <div class="row"><div class="dot" style="background:#6366f1;box-shadow:0 0 12px rgba(99,102,241,.4)"></div><h2>Grapherex</h2></div>
+        <div class="rate">Ставка: €30.00/час</div>
+      </div>
+      <div class="card-body">
+        <div class="field"><label>Количество часов</label>
+          <input type="number" step="0.01" min="0" max="744" class="hours-input" id="hoursG" placeholder="0.00" style="border:1px solid rgba(99,102,241,.2)" oninput="update()">
+        </div>
+        <div class="total-row" style="background:rgba(99,102,241,.06)">
+          <span>Итого</span><span id="totalG" style="color:#6366f1">€0.00</span>
+        </div>
+        <div class="btns">
+          <button class="btn-dl" id="btnDlG" style="background:linear-gradient(135deg,#6366f1,rgba(99,102,241,.8));width:100%" disabled onclick="downloadXLSX('grapherex')">📥 Скачать .xlsx</button>
+        </div>
+        <div class="success" id="successG"><span>✓</span><span id="successGName"></span></div>
+        <div id="emailBlockG" style="display:none;margin-top:12px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.08);overflow:hidden">
+          <div style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;flex:1">✉️ Письмо</span>
+            <span style="font-size:11px;color:#64748b">finance@grapherex.com</span>
+            <button onclick="copyText('grapherex','email',this)" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#94a3b8;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Копировать</button>
+          </div>
+          <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px">Тема</span>
+              <button onclick="copyText('grapherex','subject',this)" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#94a3b8;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Копировать</button>
+            </div>
+            <div id="subjG" style="font-size:13px;color:#e2e8f0;font-family:'JetBrains Mono',monospace;line-height:1.5"></div>
+          </div>
+          <div style="padding:10px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px">Текст</span>
+              <button onclick="copyText('grapherex','body',this)" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#94a3b8;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Копировать</button>
+            </div>
+            <div id="bodyG" style="font-size:13px;color:#e2e8f0;line-height:1.6;white-space:pre-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transferra -->
+    <div class="card" style="border:1px solid rgba(14,165,233,.15)">
+      <div class="card-head" style="background:linear-gradient(135deg,rgba(14,165,233,.12),transparent);border-bottom:1px solid rgba(14,165,233,.1)">
+        <div class="row"><div class="dot" style="background:#0ea5e9;box-shadow:0 0 12px rgba(14,165,233,.4)"></div><h2>Transferra</h2></div>
+        <div class="rate">Ставка: €30.00/час</div>
+      </div>
+      <div class="card-body">
+        <div class="field"><label>Количество часов</label>
+          <input type="number" step="0.01" min="0" max="744" class="hours-input" id="hoursT" placeholder="0.00" style="border:1px solid rgba(14,165,233,.2)" oninput="update()">
+        </div>
+        <div class="total-row" style="background:rgba(14,165,233,.06)">
+          <span>Итого</span><span id="totalT" style="color:#0ea5e9">€0.00</span>
+        </div>
+        <div class="btns">
+          <button class="btn-dl" id="btnDlT" style="background:linear-gradient(135deg,#0ea5e9,rgba(14,165,233,.8));width:100%" disabled onclick="downloadXLSX('transferra')">📥 Скачать .xlsx</button>
+        </div>
+        <div class="success" id="successT"><span>✓</span><span id="successTName"></span></div>
+        <div id="emailBlockT" style="display:none;margin-top:12px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.08);overflow:hidden">
+          <div style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;flex:1">✉️ Письмо</span>
+            <span style="font-size:11px;color:#64748b">finance@transferra.uk</span>
+            <button onclick="copyText('transferra','email',this)" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#94a3b8;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Копировать</button>
+          </div>
+          <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px">Тема</span>
+              <button onclick="copyText('transferra','subject',this)" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#94a3b8;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Копировать</button>
+            </div>
+            <div id="subjT" style="font-size:13px;color:#e2e8f0;font-family:'JetBrains Mono',monospace;line-height:1.5"></div>
+          </div>
+          <div style="padding:10px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px">Текст</span>
+              <button onclick="copyText('transferra','body',this)" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#94a3b8;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Копировать</button>
+            </div>
+            <div id="bodyT" style="font-size:13px;color:#e2e8f0;line-height:1.6;white-space:pre-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-section" id="previewSection">
+    <h3 class="preview-title">Предпросмотр</h3>
+    <div class="previews">
+      <div class="inv-preview" id="prevG"></div>
+      <div class="inv-preview" id="prevT"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <strong>Как работает:</strong> Invoice # = <code>YYYY/MM</code>. Date = 9-е следующего месяца. Due Date = 20-е. Memo = период работы. Файл = <code>Month_Year_Invoice_...</code>
+  </div>
+</div>
+
+<script>
+const MRU=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+const MEN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const CLIENTS={
+  grapherex:{name:"Grapherex",fullName:"GRAPHEREX Sp. z o.o.",rate:30,color:"#6366f1",
+    filePrefix:"Invoice_Roman_Kulykov_Android_Developer_Grapherex",
+    billTo:[["Bill to: ","GRAPHEREX Sp. z o.o."],["KRS No.:","0001100751"],["Address:","Hoża Street 86/210, "],["","00-682 Warsaw"],["","Poland"],["",""]]},
+  transferra:{name:"Transferra",fullName:"Transferra Un Limited",rate:30,color:"#0ea5e9",
+    filePrefix:"Invoice_Roman_Kulykov_Android_Developer_Transferra",
+    billTo:[["Bill to: ","Transferra Un Limited"],["Name:","Oxana Badyanova"],["Company Number:","13014681"],["Address:","1 Canada Square, 37th Floor, Canary Wharf"],["","London, E14 5AA"],["","United Kingdom"]]}
+};
+
+function pad2(n){return String(n).padStart(2,"0")}
+function lastDay(y,m){return new Date(y,m,0).getDate()}
+function invNum(y,m){return y+"/"+pad2(m)}
+function invDates(y,m){let nm=m+1,ny=y;if(nm>12){nm=1;ny++}return{invoiceDate:new Date(ny,nm-1,9),dueDate:new Date(ny,nm-1,20)}}
+function memoRange(y,m){return"Android App Development 01."+pad2(m)+"."+String(y).slice(-2)+" - "+lastDay(y,m)+"."+pad2(m)+"."+y}
+function fmtDate(d){const ms=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return pad2(d.getDate())+"/"+ms[d.getMonth()]+"/"+d.getFullYear()}
+
+// Init selectors
+const selY=document.getElementById("selYear"),selM=document.getElementById("selMonth");
+const now=new Date();
+const defMonth=now.getMonth()===0?12:now.getMonth();
+const defYear=now.getMonth()===0?now.getFullYear()-1:now.getFullYear();
+[2025,2026,2027,2028].forEach(y=>{const o=document.createElement("option");o.value=y;o.textContent=y;if(y===defYear)o.selected=true;selY.appendChild(o)});
+MRU.forEach((n,i)=>{const o=document.createElement("option");o.value=i+1;o.textContent=n;if(i+1===defMonth)o.selected=true;selM.appendChild(o)});
+selY.onchange=update;selM.onchange=update;
+
+function getVals(){
+  return{
+    year:+selY.value,month:+selM.value,
+    hoursG:parseFloat(document.getElementById("hoursG").value)||0,
+    hoursT:parseFloat(document.getElementById("hoursT").value)||0
+  };
+}
+
+function getEmailSubject(year,month){
+  return"Invoice "+invNum(year,month)+" - Roman Kulykov - "+MEN[month-1]+" "+year;
+}
+function getEmailBody(year,month){
+  return"Dear Team,\n\nPlease find attached the monthly invoice and report for "+MEN[month-1]+" "+year+".\n\nHave a nice day!\n\nBest regards,\nRoman Kulykov";
+}
+
+function update(){
+  const v=getVals();
+  document.getElementById("totalG").textContent="€"+(v.hoursG*30).toFixed(2);
+  document.getElementById("totalT").textContent="€"+(v.hoursT*30).toFixed(2);
+  document.getElementById("btnDlG").disabled=v.hoursG<=0;
+  document.getElementById("btnDlT").disabled=v.hoursT<=0;
+
+  // Email blocks
+  const showG=v.hoursG>0,showT=v.hoursT>0;
+  document.getElementById("emailBlockG").style.display=showG?"block":"none";
+  document.getElementById("emailBlockT").style.display=showT?"block":"none";
+  if(showG){
+    document.getElementById("subjG").textContent=getEmailSubject(v.year,v.month);
+    document.getElementById("bodyG").textContent=getEmailBody(v.year,v.month);
+  }
+  if(showT){
+    document.getElementById("subjT").textContent=getEmailSubject(v.year,v.month);
+    document.getElementById("bodyT").textContent=getEmailBody(v.year,v.month);
+  }
+
+  const anyPreview=showG||showT;
+  document.getElementById("previewSection").classList.toggle("show",anyPreview);
+  renderPreview("prevG","grapherex",v.year,v.month,v.hoursG);
+  renderPreview("prevT","transferra",v.year,v.month,v.hoursT);
+}
+
+function copyText(clientKey,field,btn){
+  const v=getVals();
+  const emails={grapherex:"finance@grapherex.com",transferra:"finance@transferra.uk"};
+  const text=field==="subject"?getEmailSubject(v.year,v.month):field==="email"?emails[clientKey]:getEmailBody(v.year,v.month);
+  navigator.clipboard.writeText(text).then(()=>{
+    const prev=btn.textContent;btn.textContent="✓ Скопировано";btn.style.color="#22c55e";
+    setTimeout(()=>{btn.textContent=prev==="Копировать"?"Копировать":"Копировать";btn.style.color="#94a3b8"},1500);
+  });
+}
+
+function renderPreview(elId,clientKey,year,month,hours){
+  const el=document.getElementById(elId);
+  if(hours<=0){el.classList.remove("show");return}
+  el.classList.add("show");
+  const cl=CLIENTS[clientKey],{invoiceDate,dueDate}=invDates(year,month);
+  const total=(cl.rate*hours).toFixed(2),memo=memoRange(year,month);
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+      <div><div style="color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1px">From</div><div style="font-weight:700">Roman Kulykov</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:#94a3b8">INVOICE #</div><div style="font-weight:700;color:${cl.color}">${invNum(year,month)}</div>
+      <div style="font-size:11px;margin-top:4px"><span style="color:#94a3b8">Date: </span>${fmtDate(invoiceDate)}</div>
+      <div style="font-size:11px"><span style="color:#94a3b8">Due: </span>${fmtDate(dueDate)}</div></div>
+    </div>
+    <div style="background:#f8fafc;border-radius:8px;padding:12px 16px;margin-bottom:16px">
+      <div style="color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1px">Bill To</div>
+      <div style="font-weight:600">${cl.fullName}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px 16px;padding:8px 0;border-bottom:2px solid #e2e8f0;font-size:11px;color:#94a3b8;text-transform:uppercase">
+      <div>Description</div><div style="text-align:right">Rate</div><div style="text-align:right">Hours</div><div style="text-align:right">Amount</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px 16px;padding:12px 0;border-bottom:1px solid #e2e8f0">
+      <div style="font-size:12px">${memo}</div><div style="text-align:right">€${cl.rate.toFixed(2)}</div><div style="text-align:right">${hours.toFixed(2)}</div><div style="text-align:right;font-weight:700">€${total}</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;padding:12px 0">
+      <div style="background:${cl.color}12;border-radius:8px;padding:8px 20px;display:flex;align-items:center;gap:8px">
+        <span style="color:#94a3b8;font-size:11px;text-transform:uppercase">Total</span>
+        <span style="font-size:18px;font-weight:800;color:${cl.color}">€${total}</span>
+      </div>
+    </div>`;
+}
+
+/* ========== XLSX Builder ========== */
+function buildXLSX(clientKey,year,month,hours){
+  const c=CLIENTS[clientKey],{invoiceDate,dueDate}=invDates(year,month),memo=memoRange(year,month),iNum=invNum(year,month);
+  function ds(d){return Math.round((d-new Date(1899,11,30))/864e5)}
+  function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+  const rows=[];
+  function addRow(r,cells){let x='<row r="'+r+'">';cells.forEach(([col,val,opts])=>{const ref=col+r,o=opts||{},s=o.s||0;
+    if(o.f)x+='<c r="'+ref+'" s="'+s+'"><f>'+esc(o.f)+'</f></c>';
+    else if(typeof val==="number")x+='<c r="'+ref+'" s="'+s+'"><v>'+val+'</v></c>';
+    else if(o.d)x+='<c r="'+ref+'" s="'+s+'"><v>'+ds(val)+'</v></c>';
+    else if(val!==""&&val!=null)x+='<c r="'+ref+'" s="'+s+'" t="inlineStr"><is><t>'+esc(val)+'</t></is></c>';
+  });rows.push(x+'</row>')}
+
+  addRow(3,[["A","From: "],["B","Roman Kulykov",{s:1}],["E","INVOICE # "],["F",iNum,{s:7}]]);
+  addRow(4,[["A","Registered Number:"],["B","329022-89568",{s:1}],["E","DATE"],["F",invoiceDate,{s:2,d:true}]]);
+  addRow(5,[["A","Address:"],["B","Latvia, Riga, Gertrudes 113-91, LV-1009",{s:1}],["E","DUE DATE "],["F",dueDate,{s:2,d:true}]]);
+  addRow(6,[["E","TOTAL AMOUNT"],["F",0,{s:3,f:"F19"}]]);
+  const bt=c.billTo;for(let i=0;i<bt.length;i++)addRow(10+i,[["A",bt[i][0]],["B",bt[i][1]]]);
+  addRow(18,[["A","DESCRIPTION / MEMO ",{s:6}],["D","СOST (EUR)",{s:6}],["E","Hour",{s:6}],["F","AMOUNT (EUR)",{s:6}]]);
+  addRow(19,[["A",memo],["D",c.rate,{s:4}],["E",hours,{s:4}],["F",0,{s:5,f:"D19*E19"}]]);
+  addRow(23,[["A","Notes Please transfer the total amount to the following bank account:"]]);
+  addRow(24,[["A","Name:"],["B","Roman Kulykov"]]);
+  addRow(25,[["A","IBAN:"],["B","MT49CFTE28004000000000005416821"]]);
+  addRow(26,[["A","BIC:"],["B","CFTEMTM1"]]);
+  addRow(27,[["A","Bank Name:"],["B","OpenPayd Financial Services Malta Limited"]]);
+
+  const sheetXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="1" width="18" customWidth="1"/><col min="2" max="2" width="46" customWidth="1"/><col min="3" max="3" width="6" customWidth="1"/><col min="4" max="4" width="14" customWidth="1"/><col min="5" max="5" width="13" customWidth="1"/><col min="6" max="6" width="19" customWidth="1"/></cols><sheetData>'+rows.join("")+'</sheetData><mergeCells><mergeCell ref="B3:C3"/><mergeCell ref="B4:C4"/><mergeCell ref="B5:C5"/><mergeCell ref="B10:C10"/><mergeCell ref="B13:C13"/><mergeCell ref="B14:C14"/><mergeCell ref="A18:C18"/><mergeCell ref="A19:C19"/></mergeCells></worksheet>';
+
+  const stylesXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="3"><numFmt numFmtId="164" formatCode=\'dd"/"mmm"/"yyyy\'/><numFmt numFmtId="165" formatCode=\'[$€]#,##0.00\'/><numFmt numFmtId="166" formatCode=\'0.00\'/></numFmts><fonts count="2"><font><sz val="11"/><name val="Arial"/></font><font><b/><sz val="11"/><name val="Arial"/></font></fonts><fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF2CC"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFEFEFEF"/></patternFill></fill></fills><borders count="3"><border/><border><bottom style="thin"><color rgb="FF000000"/></bottom></border><border><left style="thin"><color rgb="FF000000"/></left><right style="thin"><color rgb="FF000000"/></right><bottom style="thin"><color rgb="FF000000"/></bottom></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="8"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="2" borderId="0" applyNumberFormat="1" applyFill="1" applyAlignment="1"><alignment horizontal="right"/></xf><xf numFmtId="165" fontId="0" fillId="2" borderId="0" applyNumberFormat="1" applyFill="1" applyAlignment="1"><alignment horizontal="right"/></xf><xf numFmtId="166" fontId="0" fillId="0" borderId="1" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right"/></xf><xf numFmtId="166" fontId="0" fillId="0" borderId="2" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right"/></xf><xf numFmtId="0" fontId="0" fillId="3" borderId="2" applyFill="1" applyBorder="1"/><xf numFmtId="49" fontId="1" fillId="2" borderId="0" applyNumberFormat="1" applyFont="1" applyFill="1"/></cellXfs></styleSheet>';
+
+  const ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
+  const rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+  const wb='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Sheet1" sheetId="1" r:id="rId1"/></sheets></workbook>';
+  const wbr='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+
+  function crc32(buf){const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c}let r=0xFFFFFFFF;for(let i=0;i<buf.length;i++)r=t[(r^buf[i])&0xFF]^(r>>>8);return(r^0xFFFFFFFF)>>>0}
+  const enc=s=>new TextEncoder().encode(s);
+  function buildZip(files){
+    const entries=files.map(([n,c])=>{const d=typeof c==="string"?enc(c):c;return{name:enc(n),data:d,crc:crc32(d)}});
+    const parts=[],cd=[];let off=0;
+    for(const e of entries){
+      const lh=new Uint8Array(30+e.name.length),lv=new DataView(lh.buffer);
+      lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint32(14,e.crc,true);
+      lv.setUint32(18,e.data.length,true);lv.setUint32(22,e.data.length,true);lv.setUint16(26,e.name.length,true);
+      lh.set(e.name,30);parts.push(lh,e.data);
+      const ch=new Uint8Array(46+e.name.length),cv=new DataView(ch.buffer);
+      cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);
+      cv.setUint32(16,e.crc,true);cv.setUint32(20,e.data.length,true);cv.setUint32(24,e.data.length,true);
+      cv.setUint16(28,e.name.length,true);cv.setUint32(42,off,true);ch.set(e.name,46);cd.push(ch);
+      off+=lh.length+e.data.length;
+    }
+    let cdSz=0;cd.forEach(c=>cdSz+=c.length);
+    const eocd=new Uint8Array(22),ev=new DataView(eocd.buffer);
+    ev.setUint32(0,0x06054b50,true);ev.setUint16(8,entries.length,true);ev.setUint16(10,entries.length,true);
+    ev.setUint32(12,cdSz,true);ev.setUint32(16,off,true);
+    const all=[...parts,...cd,eocd];let tl=0;all.forEach(a=>tl+=a.length);
+    const r=new Uint8Array(tl);let p=0;for(const a of all){r.set(a,p);p+=a.length}return r;
+  }
+
+  return new Blob([buildZip([["[Content_Types].xml",ct],["_rels/.rels",rels],["xl/workbook.xml",wb],["xl/_rels/workbook.xml.rels",wbr],["xl/worksheets/sheet1.xml",sheetXml],["xl/styles.xml",stylesXml]])],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+
+function downloadXLSX(clientKey){
+  const v=getVals(),hours=clientKey==="grapherex"?v.hoursG:v.hoursT;
+  if(hours<=0)return;
+  const c=CLIENTS[clientKey],fn=MEN[v.month-1]+"_"+v.year+"_"+c.filePrefix+".xlsx";
+  const blob=buildXLSX(clientKey,v.year,v.month,hours);
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  const sfx=clientKey==="grapherex"?"G":"T";
+  document.getElementById("success"+sfx).classList.add("show");
+  document.getElementById("success"+sfx+"Name").textContent=fn;
+}
+
+update();
+</script>
+</body>
+</html>
