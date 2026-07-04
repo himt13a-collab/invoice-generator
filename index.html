@@ -75,6 +75,10 @@ select option{background:#1e293b}
 
   <div style="background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.08);padding:16px 20px;margin-bottom:24px">
     <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">🏦 Банковские реквизиты</div>
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Address</label>
+      <input id="senderAddress" value="Latvia, Riga, Generala Radzina Krastmala 17-19, LV-1050" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;font-size:13px;font-family:'JetBrains Mono',monospace;box-sizing:border-box;outline:none">
+    </div>
     <div class="bank-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
       <div>
         <label style="display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">IBAN</label>
@@ -299,7 +303,7 @@ function renderPreview(elId,clientKey,year,month,hours){
 }
 
 /* ========== XLSX Builder ========== */
-function buildXLSX(clientKey,year,month,hours,bank){
+function buildXLSX(clientKey,year,month,hours,bank,address){
   const c=CLIENTS[clientKey],{invoiceDate,dueDate}=invDates(year,month),memo=memoRange(year,month),iNum=invNum(year,month);
   function ds(d){return Math.round((d-new Date(1899,11,30))/864e5)}
   function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
@@ -313,7 +317,7 @@ function buildXLSX(clientKey,year,month,hours,bank){
 
   addRow(3,[["A","From: "],["B","Roman Kulykov",{s:1}],["E","INVOICE # "],["F",iNum,{s:7}]]);
   addRow(4,[["A","Registered Number:"],["B","329022-89568",{s:1}],["E","DATE"],["F",invoiceDate,{s:2,d:true}]]);
-  addRow(5,[["A","Address:"],["B","Latvia, Riga, Generala Radzina Krastmala 17-19, LV-1050",{s:1}],["E","DUE DATE "],["F",dueDate,{s:2,d:true}]]);
+  addRow(5,[["A","Address:"],["B",address,{s:1}],["E","DUE DATE "],["F",dueDate,{s:2,d:true}]]);
   addRow(6,[["E","TOTAL AMOUNT"],["F",0,{s:3,f:"F19"}]]);
   const bt=c.billTo;for(let i=0;i<bt.length;i++)addRow(10+i,[["A",bt[i][0]],["B",bt[i][1]]]);
   addRow(18,[["A","DESCRIPTION / MEMO ",{s:6}],["D","СOST (EUR)",{s:6}],["E","Hour",{s:6}],["F","AMOUNT (EUR)",{s:6}]]);
@@ -365,7 +369,8 @@ function downloadXLSX(clientKey){
   if(hours<=0)return;
   const c=CLIENTS[clientKey],fn=MEN[v.month-1]+"_"+v.year+"_"+c.filePrefix+".xlsx";
   const bank={iban:document.getElementById("bankIban").value,bic:document.getElementById("bankBic").value,bankName:document.getElementById("bankName").value};
-  const blob=buildXLSX(clientKey,v.year,v.month,hours,bank);
+  const address=document.getElementById("senderAddress").value;
+  const blob=buildXLSX(clientKey,v.year,v.month,hours,bank,address);
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   const sfx=clientKey==="grapherex"?"G":"T";
