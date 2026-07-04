@@ -313,7 +313,7 @@ function buildXLSX(clientKey,year,month,hours,bank){
 
   addRow(3,[["A","From: "],["B","Roman Kulykov",{s:1}],["E","INVOICE # "],["F",iNum,{s:7}]]);
   addRow(4,[["A","Registered Number:"],["B","329022-89568",{s:1}],["E","DATE"],["F",invoiceDate,{s:2,d:true}]]);
-  addRow(5,[["A","Address:"],["B","Latvia, Riga, Gertrudes 113-91, LV-1009",{s:1}],["E","DUE DATE "],["F",dueDate,{s:2,d:true}]]);
+  addRow(5,[["A","Address:"],["B","Latvia, Riga, Generala Radzina Krastmala 17-19, LV-1050",{s:1}],["E","DUE DATE "],["F",dueDate,{s:2,d:true}]]);
   addRow(6,[["E","TOTAL AMOUNT"],["F",0,{s:3,f:"F19"}]]);
   const bt=c.billTo;for(let i=0;i<bt.length;i++)addRow(10+i,[["A",bt[i][0]],["B",bt[i][1]]]);
   addRow(18,[["A","DESCRIPTION / MEMO ",{s:6}],["D","СOST (EUR)",{s:6}],["E","Hour",{s:6}],["F","AMOUNT (EUR)",{s:6}]]);
