@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Invoice Generator — Roman Kulykov</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -20,7 +21,7 @@ h1{font-size:36px;font-weight:800;background:linear-gradient(135deg,#e2e8f0,#636
 .sel-box select{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#e2e8f0;padding:8px 12px;font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;cursor:pointer}
 select option{background:#1e293b}
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media(max-width:700px){.cards{grid-template-columns:1fr}h1{font-size:28px}}
+@media(max-width:700px){.cards{grid-template-columns:1fr}h1{font-size:28px}.bank-grid{grid-template-columns:1fr!important}}
 .card{background:rgba(255,255,255,.03);border-radius:16px;overflow:hidden}
 .card-head{padding:20px 24px 16px;display:flex;flex-direction:column;gap:4px}
 .card-head .row{display:flex;align-items:center;gap:10px}
@@ -72,6 +73,24 @@ select option{background:#1e293b}
     </div>
   </div>
 
+  <div style="background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.08);padding:16px 20px;margin-bottom:24px">
+    <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">🏦 Банковские реквизиты</div>
+    <div class="bank-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div>
+        <label style="display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">IBAN</label>
+        <input id="bankIban" value="LV64HABA0551063761136" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;font-size:13px;font-family:'JetBrains Mono',monospace;box-sizing:border-box;outline:none">
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">BIC</label>
+        <input id="bankBic" value="HABALV22XXX" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;font-size:13px;font-family:'JetBrains Mono',monospace;box-sizing:border-box;outline:none">
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Bank Name</label>
+        <input id="bankName" value="Swedbank AS (Latvijā)" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;font-size:13px;font-family:'JetBrains Mono',monospace;box-sizing:border-box;outline:none">
+      </div>
+    </div>
+  </div>
+
   <div class="cards">
     <!-- Grapherex -->
     <div class="card" style="border:1px solid rgba(99,102,241,.15)">
@@ -93,7 +112,7 @@ select option{background:#1e293b}
         <div id="emailBlockG" style="display:none;margin-top:12px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.08);overflow:hidden">
           <div style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:8px">
             <span style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;flex:1">✉️ Письмо</span>
-            <span style="font-size:11px;color:#64748b">finance@grapherex.com</span>
+            <span style="font-size:11px;color:#64748b"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="87e1eee9e6e9e4e2c7e0f5e6f7efe2f5e2ffa9e4e8ea">[email&#160;protected]</a></span>
             <button onclick="copyText('grapherex','email',this)" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#94a3b8;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Копировать</button>
           </div>
           <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04)">
@@ -134,7 +153,7 @@ select option{background:#1e293b}
         <div id="emailBlockT" style="display:none;margin-top:12px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.08);overflow:hidden">
           <div style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:8px">
             <span style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;flex:1">✉️ Письмо</span>
-            <span style="font-size:11px;color:#64748b">finance@transferra.uk</span>
+            <span style="font-size:11px;color:#64748b"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7b1d12151a15181e3b0f091a15081d1e09091a550e10">[email&#160;protected]</a></span>
             <button onclick="copyText('transferra','email',this)" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#94a3b8;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Копировать</button>
           </div>
           <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04)">
@@ -169,7 +188,7 @@ select option{background:#1e293b}
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const MRU=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 const MEN=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const CLIENTS={
@@ -280,7 +299,7 @@ function renderPreview(elId,clientKey,year,month,hours){
 }
 
 /* ========== XLSX Builder ========== */
-function buildXLSX(clientKey,year,month,hours){
+function buildXLSX(clientKey,year,month,hours,bank){
   const c=CLIENTS[clientKey],{invoiceDate,dueDate}=invDates(year,month),memo=memoRange(year,month),iNum=invNum(year,month);
   function ds(d){return Math.round((d-new Date(1899,11,30))/864e5)}
   function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
@@ -301,9 +320,9 @@ function buildXLSX(clientKey,year,month,hours){
   addRow(19,[["A",memo],["D",c.rate,{s:4}],["E",hours,{s:4}],["F",0,{s:5,f:"D19*E19"}]]);
   addRow(23,[["A","Notes Please transfer the total amount to the following bank account:"]]);
   addRow(24,[["A","Name:"],["B","Roman Kulykov"]]);
-  addRow(25,[["A","IBAN:"],["B","MT49CFTE28004000000000005416821"]]);
-  addRow(26,[["A","BIC:"],["B","CFTEMTM1"]]);
-  addRow(27,[["A","Bank Name:"],["B","OpenPayd Financial Services Malta Limited"]]);
+  addRow(25,[["A","IBAN:"],["B",bank.iban]]);
+  addRow(26,[["A","BIC:"],["B",bank.bic]]);
+  addRow(27,[["A","Bank Name:"],["B",bank.bankName]]);
 
   const sheetXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="1" width="18" customWidth="1"/><col min="2" max="2" width="46" customWidth="1"/><col min="3" max="3" width="6" customWidth="1"/><col min="4" max="4" width="14" customWidth="1"/><col min="5" max="5" width="13" customWidth="1"/><col min="6" max="6" width="19" customWidth="1"/></cols><sheetData>'+rows.join("")+'</sheetData><mergeCells><mergeCell ref="B3:C3"/><mergeCell ref="B4:C4"/><mergeCell ref="B5:C5"/><mergeCell ref="B10:C10"/><mergeCell ref="B13:C13"/><mergeCell ref="B14:C14"/><mergeCell ref="A18:C18"/><mergeCell ref="A19:C19"/></mergeCells></worksheet>';
 
@@ -345,7 +364,8 @@ function downloadXLSX(clientKey){
   const v=getVals(),hours=clientKey==="grapherex"?v.hoursG:v.hoursT;
   if(hours<=0)return;
   const c=CLIENTS[clientKey],fn=MEN[v.month-1]+"_"+v.year+"_"+c.filePrefix+".xlsx";
-  const blob=buildXLSX(clientKey,v.year,v.month,hours);
+  const bank={iban:document.getElementById("bankIban").value,bic:document.getElementById("bankBic").value,bankName:document.getElementById("bankName").value};
+  const blob=buildXLSX(clientKey,v.year,v.month,hours,bank);
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   const sfx=clientKey==="grapherex"?"G":"T";
